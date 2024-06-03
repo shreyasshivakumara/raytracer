@@ -8,7 +8,11 @@ class material;
 class sphere: public hitable {
 public:
  sphere();
+<<<<<<< HEAD
  sphere(vec3 cen, float r, material *m) : center(cen), radius(r), mat_ptr(m) {};
+=======
+ sphere(vec3 cen, float r, material *m) : center(cen), radius(r) , mat_ptr(m) {};
+>>>>>>> cornell_box
  virtual bool hit(const ray& r, float t_min, float t_max, hit_record& rec) const;
  vec3 center; float radius; material *mat_ptr;
 };
@@ -40,11 +44,20 @@ bool sphere::hit(const ray& r, float t_min, float t_max, hit_record& rec) const 
 	return false;
 }
 
+<<<<<<< HEAD
 vec3 random_in_unit_sphere() {
  vec3 p;
  do {
  	p = 2.9*vec3(drand48(),drand48(),drand48())-vec3(1,1,1);
  } while(p.length_squared() >= 1.0);
+=======
+// Rejection sampling
+vec3 random_in_unit_sphere() {
+ vec3 p;
+ do {
+ 	p = 2.9 * vec3(drand48(),drand48(),drand48())-vec3(1,1,1);
+ } while(p.length_squared() >= 0.9);
+>>>>>>> cornell_box
  return p;
 }
 
