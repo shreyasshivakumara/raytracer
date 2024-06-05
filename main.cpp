@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstdlib>
 #include "sdltemplate.h"
 #include "sphere.h"
 #include "hitable_list.h"
@@ -6,40 +7,47 @@
 #include "material.h"
 #include "planes.h"
 
+
+bool russian_roulette(float probability) {
+    return ((float) rand() / RAND_MAX) < probability;
+}
+
 vec3 color(const ray& r, hitable *world, int depth) {
     hit_record rec;
-	if(world->hit(r, 0.001, MAXFLOAT, rec)) {
-        // Normal vectors can range -1 to 1 and +1 is added to normalize it.
-        // Lambert Implementation
-        // vec3 target = rec.p + rec.normal + random_in_unit_sphere();
-		// return 0.5*color(ray(rec.p,target-rec.p),world);
+    if (world->hit(r, 0.001, MAXFLOAT, rec)) {
         ray scattered;
         vec3 attenuation;
         vec3 emitted = rec.mat_ptr->emitted(rec.u, rec.v, rec.p);
-        // Maximum depth of recursion
-        if(depth < 50 && rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
-            // Recursion to get the color of the scattered ray here
-            vec3 temp = color(scattered, world, depth+1);
-            vec3 result = emitted + attenuation*temp;
-            return result;
-        } else {
-            //return vec3(0,0,0);
+
+        // Russian Roulette termination
+        if (depth >= 50) {
             return emitted;
         }
-	} else {
-		vec3 unit_dir = unit_vector(r.direction());
-		float t = 0.5*(unit_dir.y() + 1.0);
-		return (1.0-t)*vec3(1.0,1.0,1.0)+t*vec3(0.5,0.7,1.0);
-	}
-}
 
+        if (rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
+            float probability = 0.3; // Adjust this value to change the probability of termination
+            if (russian_roulette(probability)) {
+                vec3 next_color = color(scattered, world, depth + 1);
+                return emitted + attenuation * next_color / probability;
+            } else {
+                return emitted;
+            }
+        } else {
+            return emitted;
+        }
+    } else {
+        vec3 unit_dir = unit_vector(r.direction());
+        float t = 0.5 * (unit_dir.y() + 1.0);
+        return (1.0 - t) * vec3(1.0, 1.0, 1.0) + t * vec3(0.5, 0.7, 1.0);
+    }
+}
 
 int main() {
 
     // Image
     int image_width = 600;
     int image_height = 400;
-    int ns = 10;
+    int ns = 100;
 
     // Color
      // Define materials
@@ -54,20 +62,21 @@ int main() {
     sdltemplate::loop();
 
     float plane_size = 2.0; // Size of the planes
-    hitable *list[5];
+    hitable *list[6];
     int i = 0;
     list[i++] = new sphere(vec3(0, 0,-1), 0.5, metal_material);
-    //list[i++] = new sphere(vec3(0,-100.5,-1), 100, lambertian_material);
-    //list[i++] = new sphere(vec3(1, 0, -1),0.5, metal_material);
-    //list[i++] = new sphere(vec3(-1, 0, -1), 0.5, emissive_material);   // Left wall
-    list[i++] = new plane(vec3(1, 0, -1), vec3(1, 0, 0), lambertian_material, plane_size);    // Floor
-    list[i++] = new plane(vec3(-1, 0, -1), vec3(-1, 0, 0), lambertian_material, plane_size);
-    list[i++] = new plane(vec3(0, 1, -1), vec3(0, -1, 0), emissive_material, plane_size);
-    list[i++] = new plane(vec3(0, -1, -1), vec3(0, 1, 0), emissive_material, plane_size);
+    list[i++] = new sphere(vec3(0,-100.5,-1), 100, lambertian_material);
+    list[i++] = new sphere(vec3(1, 0, -1),0.5, dielectric_material);
+    list[i++] = new sphere(vec3(-1, 0, -1), 0.5, emissive_material);
+    // list[i++] = new plane(vec3(1, 0, -1), vec3(1, 0, 0), lambertian_material, plane_size);    // Floor
+    // list[i++] = new plane(vec3(-1, 0, -1), vec3(-1, 0, 0), lambertian_material, plane_size);
+    // list[i++] = new plane(vec3(0, 0, -1), vec3(0, 0, 1), lambertian_material, plane_size);
+    // list[i++] = new plane(vec3(0, 1, -1), vec3(0, -1, 0), emissive_material, plane_size);
+    // list[i++] = new plane(vec3(0, -1, -1), vec3(0, 1, 0), emissive_material, plane_size);
 
     hitable *world = new hitable_list(list,i);
 
-    camera cam(vec3(0,0,1.1), vec3(0,0,-1), vec3(0,1,0), 60, float(image_width)/float(image_height));
+    camera cam(vec3(0,0,1), vec3(0,0,-1), vec3(0,1,0), 60, float(image_width)/float(image_height));
 
     for (int j = image_height -1 ; j >= 00; j--) {
         for (int i = 0; i < image_width; i++) {
@@ -96,25 +105,3 @@ int main() {
     }
 }
 
-
-
-
-
-
-
-//EMITS SPHERE AS A LIGHT SOURCE
-// vec3 color(const ray& r, hitable *world, int depth) {
-//     hit_record rec;
-//     if(world->hit(r, 0.001, MAXFLOAT, rec)) {
-//         ray scattered;
-//         vec3 attenuation;
-//         vec3 emitted = rec.mat_ptr->emitted(rec.u, rec.v, rec.p);
-//         if(depth < 50 && rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
-//             return emitted + attenuation*color(scattered, world, depth+1);
-//         } else {
-//             return emitted;
-//         }
-//     } else {
-//         return vec3(0,0,0);
-//     }
-// }

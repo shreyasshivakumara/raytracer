@@ -144,4 +144,24 @@ float schlick(float cosine, float ref_idx) {
  return r0 + (1-r0)*pow((1-cosine),5);
 }
 
+inline vec3 random_cosine_direction() {
+    float r1 = drand48();
+    float r2 = drand48();
+    float z = sqrt(1 - r2);
+
+    float phi = 2 * M_PI * r1;
+    float x = cos(phi) * sqrt(r2);
+    float y = sin(phi) * sqrt(r2);
+
+    return vec3(x, y, z);
+}
+
+
+inline vec3 random_in_hemisphere(const vec3& normal) {
+    vec3 in_unit_sphere = random_cosine_direction();
+    if (dot(in_unit_sphere, normal) > 0.0) // In the same hemisphere as the normal
+        return in_unit_sphere;
+    else
+        return -in_unit_sphere;
+}
 #endif
