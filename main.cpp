@@ -6,6 +6,8 @@
 #include "camera.h"
 #include "material.h"
 #include "planes.h"
+#include <fstream>
+
 
 
 bool russian_roulette(float probability) {
@@ -47,7 +49,7 @@ int main() {
     // Image
     int image_width = 600;
     int image_height = 400;
-    int ns = 100;
+    int ns = 10;
 
     // Color
      // Define materials
@@ -78,6 +80,9 @@ int main() {
 
     camera cam(vec3(0,0,1), vec3(0,0,-1), vec3(0,1,0), 60, float(image_width)/float(image_height));
 
+    std::ofstream outfile("output/output.ppm");
+    outfile << "P3\n" << image_width << ' ' << image_height << "\n255\n";
+
     for (int j = image_height -1 ; j >= 00; j--) {
         for (int i = 0; i < image_width; i++) {
             vec3 col(0, 0, 0);
@@ -95,11 +100,17 @@ int main() {
             int ig = int(255.999 * col[1]);
             int ib = int(255.999 * col[2]);
 
+            // Write the color to the output file
+            outfile << ir << ' ' << ig << ' ' << ib << '\n';
+
             //std::cout << ir << ' ' << ig << ' ' << ib << '\n';
             sdltemplate::setDrawColor(sdltemplate::createColor(ir, ig, ib, 255));
             sdltemplate::drawPoint(i, image_height - j);
         }
     }
+    
+    outfile.close(); // Close the output file
+
     while(sdltemplate::running){
         sdltemplate::loop();
     }
