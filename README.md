@@ -13,12 +13,10 @@ Execute the following command in the terminal to run the ray tracer:
 1. **Vector Class (`vec3`)**
    - **Purpose**: Handles fundamental 3D vector operations.
    - **Operations**: Addition, subtraction, multiplication, division, normalization, and length computation.
-   - **Technical Details**: Provides essential operations for vector math used throughout ray tracing, such as computing intersections, reflections, and lighting.
 
 2. **Ray Class**
    - **Purpose**: Represents rays with origin and direction.
    - **Operations**: Computes points along the ray.
-   - **Technical Details**: Essential for tracing rays from the camera through the scene and determining intersections with objects.
 
 3. **Material Classes**
    - **Purpose**: Handle various material properties and interactions with rays.
@@ -39,13 +37,11 @@ Execute the following command in the terminal to run the ray tracer:
 5. **Hitable List**
    - **Purpose**: Manages multiple hitable objects for efficient intersection testing.
    - **Operations**: Aggregates intersection tests across objects.
-   - **Technical Details**: Enables complex scenes by efficiently managing and testing intersections.
 
 6. **Camera Class**
    - **Purpose**: Defines the viewpoint and generates rays through the image plane.
    - **Operations**: Computes rays based on camera parameters.
-   - **Technical Details**: Essential for initiating the ray tracing process.
-
+     
 7. **Color Function**
    - **Purpose**: Implements recursive ray tracing and shading.
    - **Operations**: Computes color by tracing rays and handling reflections, refractions, and lighting.
@@ -54,7 +50,6 @@ Execute the following command in the terminal to run the ray tracer:
 8. **Main Rendering Loop**
    - **Purpose**: Sets up the scene, renders the image, and outputs the result.
    - **Operations**: Iterates over pixels, generates rays, and accumulates colors using Monte Carlo integration.
-   - **Technical Details**: Includes Monte Carlo integration and gamma correction.
 
 ### Sampling Techniques
 
