@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstdlib>
+#include <string>
 #include "sdltemplate.h"
 #include "sphere.h"
 #include "hitable_list.h"
@@ -44,26 +45,30 @@ vec3 color(const ray& r, hitable *world, int depth) {
     }
 }
 
-int main() {
+int main(int argc, char* argv[]) {
 
-    // Image
+    bool use_sdl = true;
+    if (argc > 1 && std::string(argv[1]) == "--no-sdl") {
+        use_sdl = false;
+    }
+
     int image_width = 600;
     int image_height = 400;
-    int ns = 10;
-
-    // Color
-     // Define materials
+    int ns = 500;
     material* lambertian_material = new lambertian(vec3(0.5, 0.5, 0.8));
     material* metal_material = new metal(vec3(0.8, 0.8, 0.8), 0.3);
     material* dielectric_material = new dielectric(1.5);
     material* emissive_material = new emissive(vec3(1.0, 1.0, 1.0));
 
-    // Render
-    std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
-    sdltemplate::sdl("Ray Tracing", image_width, image_height);
-    sdltemplate::loop();
+    if (use_sdl) {
+        std::cout << "Initializing SDL..." << std::endl;
+        sdltemplate::sdl("Ray Tracing", image_width, image_height);
+        sdltemplate::loop();
+    } else {
+        std::cout << "" << std::endl;
+    }
 
-    float plane_size = 2.0; // Size of the planes
+    float plane_size = 2.0;
     hitable *list[6];
     int i = 0;
     list[i++] = new sphere(vec3(0, 0,-1), 0.5, metal_material);
@@ -82,8 +87,9 @@ int main() {
 
     std::ofstream outfile("output/output.ppm");
     outfile << "P3\n" << image_width << ' ' << image_height << "\n255\n";
-
+    
     for (int j = image_height -1 ; j >= 00; j--) {
+
         for (int i = 0; i < image_width; i++) {
             vec3 col(0, 0, 0);
             for (int s = 0; s < ns; s++) {
@@ -103,16 +109,21 @@ int main() {
             // Write the color to the output file
             outfile << ir << ' ' << ig << ' ' << ib << '\n';
 
-            //std::cout << ir << ' ' << ig << ' ' << ib << '\n';
-            sdltemplate::setDrawColor(sdltemplate::createColor(ir, ig, ib, 255));
-            sdltemplate::drawPoint(i, image_height - j);
+            // Only use SDL if enabled
+            if (use_sdl) {
+                sdltemplate::setDrawColor(sdltemplate::createColor(ir, ig, ib, 255));
+                sdltemplate::drawPoint(i, image_height - j);
+            }
         }
     }
-    
-    outfile.close(); // Close the output file
 
-    while(sdltemplate::running){
-        sdltemplate::loop();
+    outfile.close(); // Close the output file
+    std::cout << "Output saved to output/output.ppm" << std::endl;
+
+    if (use_sdl) {
+        while(sdltemplate::running){
+            sdltemplate::loop();
+        }
     }
 }
 

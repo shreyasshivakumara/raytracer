@@ -31,8 +31,25 @@ void sdl() {
   window =
       SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
                        width, height, SDL_WINDOW_SHOWN);
-  renderer = SDL_CreateRenderer(
-      window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+  
+  // Try hardware acceleration first, fall back to software if it fails
+  renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+  if (!renderer) {
+    std::cout << "Hardware acceleration failed, trying software rendering..." << std::endl;
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
+  }
+  if (!renderer) {
+    std::cout << "Software rendering also failed, trying basic renderer..." << std::endl;
+    renderer = SDL_CreateRenderer(window, -1, 0);
+  }
+  
+  if (!renderer) {
+    std::cerr << "Failed to create renderer: " << SDL_GetError() << std::endl;
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+    exit(1);
+  }
+  
   SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
   running = 1;
   screensize.x=screensize.y=0;
