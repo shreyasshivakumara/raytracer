@@ -5,7 +5,7 @@ This is a simple ray tracer implemented in C++ based on the book "Ray Tracing in
 Execute the following command in the terminal to run the ray tracer:
 
 ```bash
-./build.sh
+./build.sh --no-sdl
 ```
 
 ## High-Level Components Implemented in this Ray Tracer
